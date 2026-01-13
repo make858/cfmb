@@ -5,11 +5,11 @@ import { connect } from 'cloudflare:sockets';
 // =============================================================================
 
 // Web 登录密码
-const WEB_PASSWORD = "159357aB";  // 修改你的登录密码
+const WEB_PASSWORD = "123456";  // 修改你的登录密码
 
 // Telegram 机器人配置
-const TG_BOT_TOKEN = "8207794063:AAHFp6R4UMUldAkZ56_B1mX-O3PfpwDr1m4"; // Telegram Bot Token
-const TG_CHAT_ID = "1689779814"; // Telegram Chat ID
+const TG_BOT_TOKEN = "xxxxxxxxxxxxxxx"; // Telegram Bot Token
+const TG_CHAT_ID = "xxxxxxxx"; // Telegram Chat ID
 
 // Cloudflare 统计配置（支持多账号）
 // 格式: CF_ACCOUNTS_1={"email":"...", "key":"..."}, CF_ACCOUNTS_2={"email":"...", "key":"..."}
@@ -1045,3 +1045,4 @@ export default {
     }
   }
 };
+
