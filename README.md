@@ -1,3 +1,5 @@
+#此代码提取自天成大佬的1.32V2  感谢大佬
+
 # 🚀 Cloudflare Pages 部署完整指南
 
 **修复完成日期**: 2026年1月13日  
@@ -443,7 +445,7 @@ setInterval(refreshStats, 5 * 60 * 1000);  // 5 分钟
 ---
 
 🙏 特别感谢与致谢
-  源代码作者：[链接](<https://github.com/xtgm/stallTCP1.32V2>)
+  源代码作者：天诚大佬 [链接](<https://github.com/xtgm/stallTCP1.32V2>)
 ---
 
 **部署指南完成！祝您部署顺利！** 🎉
