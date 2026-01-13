@@ -8,8 +8,8 @@ import { connect } from 'cloudflare:sockets';
 const WEB_PASSWORD = "123456";  // 修改你的登录密码
 
 // Telegram 机器人配置
-const TG_BOT_TOKEN = "xxxxxxxxxxxxxxx"; // Telegram Bot Token
-const TG_CHAT_ID = "xxxxxxxx"; // Telegram Chat ID
+const TG_BOT_TOKEN = "xxxxxxxxx"; // Telegram Bot Token改成你自己的
+const TG_CHAT_ID = "xxxxxxxx"; // Telegram Chat ID改成你自己的
 
 // Cloudflare 统计配置（支持多账号）
 // 格式: CF_ACCOUNTS_1={"email":"...", "key":"..."}, CF_ACCOUNTS_2={"email":"...", "key":"..."}
@@ -90,14 +90,7 @@ async function getCloudflareUsage(env, accountConfig = null) {
       method: "POST",
       headers: hdr,
       body: JSON.stringify({
-        query: `query getBillingMetrics($AccountID: String!, $filter: AccountWorkersInvocationsAdaptiveFilter_InputObject) { 
-          viewer { 
-            accounts(filter: {accountTag: $AccountID}) { 
-              pagesFunctionsInvocationsAdaptiveGroups(limit: 1000, filter: $filter) { sum { requests } } 
-              workersInvocationsAdaptive(limit: 10000, filter: $filter) { sum { requests } } 
-            } 
-          } 
-        }`,
+        query: `query getBillingMetrics($AccountID: String!, $filter: AccountWorkersInvocationsAdaptiveFilter_InputObject) { viewer { accounts(filter: {accountTag: $AccountID}) { pagesFunctionsInvocationsAdaptiveGroups(limit: 1000, filter: $filter) { sum { requests } } workersInvocationsAdaptive(limit: 10000, filter: $filter) { sum { requests } } } } }`,
         variables: {
           AccountID: finalAccountID,
           filter: {
@@ -350,317 +343,12 @@ function generateWebPage(cfStats) {
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <meta name="description" content="Cloudflare 使用统计面板">
+    <meta name="theme-color" content="#0066cc">
     <title>☁️ Cloudflare 统计面板</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        :root {
-            --primary: #0066cc;
-            --success: #4caf50;
-            --warning: #ff9800;
-            --danger: #f44336;
-            --bg-primary: #0f172a;
-            --bg-secondary: #1e293b;
-            --bg-tertiary: #334155;
-            --text-primary: #f1f5f9;
-            --text-secondary: #cbd5e1;
-            --border: #475569;
-        }
-
-        body {
-            background: linear-gradient(135deg, var(--bg-primary) 0%, #1a2332 100%);
-            color: var(--text-primary);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            padding: 20px;
-            min-height: 100vh;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .header {
-            text-align: center;
-            margin-bottom: 40px;
-            padding: 20px 0;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .header h1 {
-            font-size: 32px;
-            margin-bottom: 10px;
-            background: linear-gradient(135deg, #00d4ff 0%, #0066cc 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .header .status {
-            font-size: 14px;
-            color: var(--text-secondary);
-        }
-
-        .controls {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-            margin-bottom: 30px;
-            flex-wrap: wrap;
-        }
-
-        .btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: all 0.3s ease;
-            font-weight: 600;
-        }
-
-        .btn-primary {
-            background: var(--primary);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: #0052a3;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 102, 204, 0.3);
-        }
-
-        .btn-secondary {
-            background: var(--bg-tertiary);
-            color: var(--text-primary);
-            border: 1px solid var(--border);
-        }
-
-        .btn-secondary:hover {
-            background: var(--border);
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .account-card {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 20px;
-            transition: all 0.3s ease;
-        }
-
-        .account-card:hover {
-            border-color: var(--primary);
-            box-shadow: 0 8px 24px rgba(0, 102, 204, 0.1);
-            transform: translateY(-4px);
-        }
-
-        .account-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .account-name {
-            font-size: 16px;
-            font-weight: 600;
-            color: #00d4ff;
-        }
-
-        .account-id {
-            font-size: 12px;
-            color: var(--text-secondary);
-            font-family: monospace;
-        }
-
-        .stats-row {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 15px;
-            font-size: 14px;
-        }
-
-        .stats-row span {
-            color: var(--text-secondary);
-        }
-
-        .stats-row strong {
-            color: var(--text-primary);
-            font-weight: 600;
-        }
-
-        .progress-bar {
-            width: 100%;
-            height: 24px;
-            background: var(--bg-tertiary);
-            border-radius: 4px;
-            overflow: hidden;
-            margin-bottom: 8px;
-            border: 1px solid var(--border);
-        }
-
-        .progress-fill {
-            height: 100%;
-            transition: width 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .progress-fill::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-            animation: shimmer 2s infinite;
-        }
-
-        @keyframes shimmer {
-            0% { transform: translateX(-100%); }
-            100% { transform: translateX(100%); }
-        }
-
-        .progress-label {
-            display: flex;
-            justify-content: space-between;
-            font-size: 12px;
-            color: var(--text-secondary);
-        }
-
-        .summary {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 20px;
-        }
-
-        .summary-title {
-            font-size: 16px;
-            font-weight: 600;
-            margin-bottom: 15px;
-            color: #00d4ff;
-        }
-
-        .summary-stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 15px;
-        }
-
-        .summary-stat {
-            text-align: center;
-            padding: 10px;
-            background: var(--bg-tertiary);
-            border-radius: 4px;
-            border: 1px solid var(--border);
-        }
-
-        .summary-stat-value {
-            font-size: 20px;
-            font-weight: 600;
-            color: #00d4ff;
-        }
-
-        .summary-stat-label {
-            font-size: 12px;
-            color: var(--text-secondary);
-            margin-top: 5px;
-        }
-
-        .footer {
-            text-align: center;
-            font-size: 12px;
-            color: var(--text-secondary);
-            padding-top: 20px;
-            border-top: 1px solid var(--border);
-        }
-
-        .loading {
-            display: inline-block;
-            width: 4px;
-            height: 4px;
-            background: #00d4ff;
-            border-radius: 50%;
-            animation: blink 1s infinite;
-        }
-
-        @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-
-        .login-form {
-            max-width: 400px;
-            margin: 100px auto;
-            background: var(--bg-secondary);
-            padding: 30px;
-            border-radius: 8px;
-            border: 1px solid var(--border);
-        }
-
-        .login-form h2 {
-            margin-bottom: 20px;
-            text-align: center;
-            color: #00d4ff;
-        }
-
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-            font-size: 14px;
-            color: var(--text-secondary);
-        }
-
-        .form-group input {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid var(--border);
-            border-radius: 4px;
-            background: var(--bg-tertiary);
-            color: var(--text-primary);
-            font-size: 14px;
-        }
-
-        .form-group input:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 2px rgba(0, 102, 204, 0.1);
-        }
-
-        @media (max-width: 768px) {
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .header h1 {
-                font-size: 24px;
-            }
-
-            .summary-stats {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
+        * {margin:0;padding:0;box-sizing:border-box}:root{--p:#0066cc;--bg1:#0f172a;--bg2:#1e293b;--bg3:#334155;--t1:#f1f5f9;--t2:#cbd5e1;--b:#475569}body{background:linear-gradient(135deg,var(--bg1) 0%,#1a2332 100%);color:var(--t1);font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;padding:20px;min-height:100vh;width:100%;overflow-x:hidden;-webkit-user-select:none;-webkit-touch-callout:none;touch-action:manipulation}.container{max-width:1200px;margin:0 auto;width:100%}.header{text-align:center;margin-bottom:30px;padding:20px 0;border-bottom:1px solid var(--b)}.header h1{font-size:32px;margin-bottom:10px;background:linear-gradient(135deg,#00d4ff 0%,#0066cc 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}.header .status{font-size:14px;color:var(--t2)}.controls{display:flex;gap:10px;justify-content:center;margin-bottom:30px;flex-wrap:wrap}.btn{padding:10px 20px;border:none;border-radius:6px;cursor:pointer;font-size:14px;transition:all 0.3s;font-weight:600;-webkit-user-select:none;touch-action:manipulation}.btn-primary{background:var(--p);color:#fff}.btn-primary:hover{background:#0052a3;transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,102,204,0.3)}.btn-primary:active{transform:translateY(0)}.btn-secondary{background:var(--bg3);color:var(--t1);border:1px solid var(--b)}.btn-secondary:hover{background:var(--b)}.stats-grid{display:grid;gap:20px;margin-bottom:30px;touch-action:pan-y}.account-card{background:var(--bg2);border:1px solid var(--b);border-radius:8px;padding:20px;transition:all 0.3s;-webkit-user-select:text}.account-card:hover{border-color:var(--p);box-shadow:0 8px 24px rgba(0,102,204,0.1);transform:translateY(-4px)}.account-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;padding-bottom:10px;border-bottom:1px solid var(--b);flex-wrap:wrap;gap:10px}.account-name{font-size:16px;font-weight:600;color:#00d4ff}.account-id{font-size:12px;color:var(--t2);font-family:monospace}.stats-row{display:flex;justify-content:space-between;margin-bottom:15px;font-size:14px;flex-wrap:wrap;gap:10px}.stats-row span{color:var(--t2)}.stats-row strong{color:var(--t1);font-weight:600}.progress-bar{width:100%;height:24px;background:var(--bg3);border-radius:4px;overflow:hidden;margin-bottom:8px;border:1px solid var(--b)}.progress-fill{height:100%;transition:width 0.3s;position:relative;overflow:hidden}.progress-fill::after{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.3),transparent);animation:shimmer 2s infinite}.progress-label{display:flex;justify-content:space-between;font-size:12px;color:var(--t2);flex-wrap:wrap}.summary{background:var(--bg2);border:1px solid var(--b);border-radius:8px;padding:20px;margin-bottom:20px;touch-action:pan-y}.summary-title{font-size:16px;font-weight:600;margin-bottom:15px;color:#00d4ff}.summary-stats{display:grid;gap:15px}.summary-stat{text-align:center;padding:10px;background:var(--bg3);border-radius:4px;border:1px solid var(--b)}.summary-stat-value{font-size:20px;font-weight:600;color:#00d4ff}.summary-stat-label{font-size:12px;color:var(--t2);margin-top:5px}.footer{text-align:center;font-size:12px;color:var(--t2);padding-top:20px;border-top:1px solid var(--b)}.loading{display:inline-block;width:4px;height:4px;background:#00d4ff;border-radius:50%;animation:blink 1s infinite}.login-form{max-width:400px;margin:100px auto;background:var(--bg2);padding:30px;border-radius:8px;border:1px solid var(--b)}.login-form h2{margin-bottom:20px;text-align:center;color:#00d4ff}.form-group{margin-bottom:15px}.form-group label{display:block;margin-bottom:5px;font-size:14px;color:var(--t2)}.form-group input{width:100%;padding:10px;border:1px solid var(--b);border-radius:4px;background:var(--bg3);color:var(--t1);font-size:14px;-webkit-user-select:text;touch-action:manipulation}.form-group input:focus{outline:0;border-color:var(--p);box-shadow:0 0 0 2px rgba(0,102,204,0.1)}@keyframes shimmer{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}@keyframes blink{0%,100%{opacity:1}50%{opacity:0.5}}@media (max-width:768px){.stats-grid{grid-template-columns:1fr}.header h1{font-size:24px}.summary-stats{grid-template-columns:repeat(2,1fr)}.account-header{flex-direction:column;align-items:flex-start}.stats-row{flex-direction:column}.controls{gap:8px}.btn{width:100%;padding:8px 16px;font-size:13px}.header{margin-bottom:20px;padding:15px 0}.container{padding:0}body{padding:10px}}
     </style>
 </head>
 <body>
@@ -717,70 +405,7 @@ function generateWebPage(cfStats) {
     </div>
 
     <script>
-        let autoRefreshInterval = null;
-        let isAutoRefreshEnabled = localStorage.getItem('autoRefreshEnabled') === 'true';
-
-        function updateNextRefreshTime() {
-            const now = new Date();
-            const next = new Date(now.getTime() + 60 * 60 * 1000);
-            document.getElementById('nextRefreshTime').textContent = \`下次手动刷新: \${next.toLocaleTimeString('zh-CN')}\`;
-        }
-
-        async function refreshStats() {
-            try {
-                const response = await fetch('/?flag=stats_api', {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                });
-                if (!response.ok) {
-                    throw new Error('HTTP error status: ' + response.status);
-                }
-                const data = await response.json();
-                if (data.html) {
-                    document.getElementById('statsContainer').innerHTML = data.html;
-                    document.getElementById('updateTime').textContent = new Date().toLocaleString('zh-CN');
-                    updateNextRefreshTime();
-                } else {
-                    console.error('响应格式错误:', data);
-                }
-            } catch(e) {
-                console.error('刷新失败:', e);
-                document.getElementById('statsContainer').innerHTML = '<div class="summary"><p style="text-align: center; color: var(--text-secondary);">数据加载失败，请稍后重试或刷新页面</p></div>';
-            }
-        }
-
-        function toggleAutoRefresh() {
-            isAutoRefreshEnabled = !isAutoRefreshEnabled;
-            localStorage.setItem('autoRefreshEnabled', isAutoRefreshEnabled);
-            const btn = document.getElementById('autoRefreshBtn');
-
-            if (isAutoRefreshEnabled) {
-                btn.textContent = '⏱️ 禁用自动刷新';
-                autoRefreshInterval = setInterval(refreshStats, 60 * 60 * 1000); // 60 分钟
-                updateNextRefreshTime();
-            } else {
-                btn.textContent = '⏱️ 启用自动刷新 (60分钟)';
-                clearInterval(autoRefreshInterval);
-            }
-        }
-
-        function logout() {
-            document.cookie = "auth=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
-            location.reload();
-        }
-
-        // 页面加载时初始化自动刷新
-        if (isAutoRefreshEnabled) {
-            toggleAutoRefresh();
-        }
-
-        // 定期检查使用量（每 5 分钟）
-        setInterval(refreshStats, 5 * 60 * 1000);
-        
-        // 初始化下次刷新时间显示
-        updateNextRefreshTime();
+        let autoRefreshInterval=null,isAutoRefreshEnabled=localStorage.getItem('autoRefreshEnabled')==='true',lastRefresh=0,isLoading=false;const CACHE_TTL=5*60*1000,MIN_REFRESH_INTERVAL=2000;function updateNextRefreshTime(){const n=new Date(Date.now()+60*60*1000);document.getElementById('nextRefreshTime').textContent=\`下次手动刷新: \${n.toLocaleTimeString('zh-CN')}\`}async function refreshStats(){if(isLoading||Date.now()-lastRefresh<MIN_REFRESH_INTERVAL)return;isLoading=true;try{const r=await fetch('/?flag=stats_api',{method:'GET',cache:'no-store'});if(!r.ok)throw new Error('HTTP '+r.status);const d=await r.json();if(d.html){document.getElementById('statsContainer').innerHTML=d.html;document.getElementById('updateTime').textContent=new Date().toLocaleString('zh-CN');updateNextRefreshTime();lastRefresh=Date.now()}else console.error('错误:',d)}catch(e){console.error('刷新失败:',e);document.getElementById('statsContainer').innerHTML='<div class="summary"><p style="text-align:center;color:var(--t2);">数据加载失败，请稍后重试</p></div>'}finally{isLoading=false}}function toggleAutoRefresh(){isAutoRefreshEnabled=!isAutoRefreshEnabled;localStorage.setItem('autoRefreshEnabled',isAutoRefreshEnabled);const b=document.getElementById('autoRefreshBtn');if(isAutoRefreshEnabled){b.textContent='⏱️ 禁用自动刷新';autoRefreshInterval=setInterval(refreshStats,60*60*1000);updateNextRefreshTime()}else{b.textContent='⏱️ 启用自动刷新 (60分钟)';clearInterval(autoRefreshInterval)}}function logout(){document.cookie="auth=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";location.reload()}if(isAutoRefreshEnabled)toggleAutoRefresh();setInterval(refreshStats,5*60*1000);updateNextRefreshTime();window.addEventListener('online',()=>{refreshStats();console.log('网络已恢复')});window.addEventListener('offline',()=>{console.log('网络连接已断开')});
     </script>
 </body>
 </html>`;
@@ -834,76 +459,12 @@ export default {
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <meta name="description" content="Cloudflare 使用统计面板">
+    <meta name="theme-color" content="#0066cc">
     <title>登录 - Cloudflare 统计面板</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            background: linear-gradient(135deg, #0f172a 0%, #1a2332 100%);
-            color: #f1f5f9;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-        .login-form {
-            max-width: 400px;
-            width: 100%;
-            background: #1e293b;
-            padding: 30px;
-            border-radius: 8px;
-            border: 1px solid #475569;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-        }
-        .login-form h2 {
-            margin-bottom: 20px;
-            text-align: center;
-            background: linear-gradient(135deg, #00d4ff 0%, #0066cc 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            font-size: 24px;
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-            font-size: 14px;
-            color: #cbd5e1;
-        }
-        .form-group input {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #475569;
-            border-radius: 4px;
-            background: #334155;
-            color: #f1f5f9;
-            font-size: 14px;
-        }
-        .form-group input:focus {
-            outline: none;
-            border-color: #0066cc;
-            box-shadow: 0 0 0 2px rgba(0, 102, 204, 0.1);
-        }
-        .btn {
-            width: 100%;
-            padding: 10px;
-            background: #0066cc;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-            transition: all 0.3s;
-        }
-        .btn:hover {
-            background: #0052a3;
-        }
+        *{margin:0;padding:0;box-sizing:border-box}body{background:linear-gradient(135deg,#0f172a 0%,#1a2332 100%);color:#f1f5f9;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;width:100%;overflow-x:hidden;-webkit-user-select:none;touch-action:manipulation}.login-form{max-width:400px;width:100%;background:#1e293b;padding:30px;border-radius:8px;border:1px solid #475569;box-shadow:0 10px 40px rgba(0,0,0,0.3)}.login-form h2{margin-bottom:20px;text-align:center;background:linear-gradient(135deg,#00d4ff 0%,#0066cc 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-size:24px}.form-group{margin-bottom:15px}.form-group label{display:block;margin-bottom:5px;font-size:14px;color:#cbd5e1;-webkit-user-select:none}.form-group input{width:100%;padding:10px;border:1px solid #475569;border-radius:4px;background:#334155;color:#f1f5f9;font-size:14px;-webkit-user-select:text;touch-action:manipulation}.form-group input:focus{outline:0;border-color:#0066cc;box-shadow:0 0 0 2px rgba(0,102,204,0.1)}.btn{width:100%;padding:10px;background:#0066cc;color:#fff;border:0;border-radius:4px;cursor:pointer;font-size:14px;font-weight:600;transition:all 0.3s;-webkit-user-select:none;touch-action:manipulation}.btn:hover{background:#0052a3}.btn:active{transform:scale(0.98)}@media (max-width:480px){.login-form{padding:20px;margin:50px auto}.login-form h2{font-size:20px}.form-group input{padding:8px;font-size:13px}.btn{padding:8px;font-size:13px}}
     </style>
 </head>
 <body>
@@ -1035,7 +596,12 @@ export default {
         ctx.waitUntil(checkAndNotifyHighUsage(env));
 
         return new Response(generateWebPage(cfStats), {
-          headers: { 'Content-Type': 'text/html; charset=utf-8' }
+          headers: { 
+            'Content-Type': 'text/html; charset=utf-8',
+            'Cache-Control': 'no-cache, must-revalidate',
+            'X-Content-Type-Options': 'nosniff',
+            'X-Frame-Options': 'SAMEORIGIN'
+          }
         });
       }
 
@@ -1045,4 +611,3 @@ export default {
     }
   }
 };
-
