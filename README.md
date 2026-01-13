@@ -1,6 +1,6 @@
 # 此代码提取自天成大佬的1.32V2  感谢大佬
 # 效果图
-![GitHub Logo]((https://github.com/make858/cfmb/blob/main/%E6%88%AA%E5%9B%BE20260113152621.png))
+<img width="1255" height="625" alt="截图20260113152621" src="https://github.com/user-attachments/assets/6853939e-68b2-4023-8835-4da40b2a2097" />
 
 # 🚀 Cloudflare Pages 部署完整指南
 
@@ -78,6 +78,7 @@ CF_TOKEN = 复制的 API Token
 ---
 
 ## 📝 环境变量配置
+<img width="1141" height="468" alt="截图20260113152533" src="https://github.com/user-attachments/assets/8e8dd605-2055-44ed-a735-56ef576b6ba4" />
 
 ### 在 Cloudflare Workers 中设置环境变量
 
