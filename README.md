@@ -1,4 +1,5 @@
 # 此代码提取自天成大佬的1.32V2  感谢大佬
+蓝奏云下载:Python编译版本  https://wwbnn.lanzouu.com/iClSS3g67lxc
 # python版效果图
 <img width="916" height="739" alt="截图20260115102830" src="https://github.com/user-attachments/assets/7fedd85c-e56b-4c56-bec1-c14e148a17be" />
 
