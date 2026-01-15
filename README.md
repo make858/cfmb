@@ -1,5 +1,8 @@
 # 此代码提取自天成大佬的1.32V2  感谢大佬
-# 效果图
+# python版效果图
+<img width="916" height="739" alt="截图20260115102830" src="https://github.com/user-attachments/assets/7fedd85c-e56b-4c56-bec1-c14e148a17be" />
+
+# 网页版效果图
 <img width="1255" height="625" alt="截图20260113152621" src="https://github.com/user-attachments/assets/6853939e-68b2-4023-8835-4da40b2a2097" />
 
 # 🚀 Cloudflare Pages 部署完整指南
