@@ -14,7 +14,7 @@ from PyQt6.QtWidgets import (
     QListWidgetItem, QCheckBox, QMessageBox, QInputDialog, QTabWidget,
     QScrollArea
 )
-from PyQt6.QtCharts import QChart, QChartView, QBarSeries, QBarSet, QValueAxis, QCategoryAxis, QPieSeries, QPieSlice
+from PyQt6.QtCharts import QChart, QChartView, QBarSeries, QBarSet, QValueAxis, QBarCategoryAxis, QPieSeries, QPieSlice
 from PyQt6.QtCore import Qt, QThread, pyqtSignal, QTimer, QMutex, QMutexLocker
 from PyQt6.QtGui import QFont, QIcon, QColor, QPainter
 
@@ -450,20 +450,17 @@ class AccountChartWidget(QWidget):
 
         chart.addSeries(self.bar_series)
 
-        # X轴（类别轴）
         categories = ["总量", "Works", "Pages"]
-        axis_x = QCategoryAxis()
-        for i, category in enumerate(categories):
-            axis_x.append(category, (i + 1) * 1.0)
+        axis_x = QBarCategoryAxis()
+        axis_x.append(categories)
         axis_x.setTitleText("类型")
         chart.addAxis(axis_x, Qt.AlignmentFlag.AlignBottom)
         self.bar_series.attachAxis(axis_x)
 
-        # Y轴（值轴）
-        axis_y = QValueAxis()
-        axis_y.setTitleText("请求")
-        chart.addAxis(axis_y, Qt.AlignmentFlag.AlignLeft)
-        self.bar_series.attachAxis(axis_y)
+        self.bar_axis_y = QValueAxis()
+        self.bar_axis_y.setTitleText("请求")
+        chart.addAxis(self.bar_axis_y, Qt.AlignmentFlag.AlignLeft)
+        self.bar_series.attachAxis(self.bar_axis_y)
 
         chart_view = QChartView(chart)
         chart_view.setRenderHint(QPainter.RenderHint.Antialiasing)
@@ -505,8 +502,12 @@ class AccountChartWidget(QWidget):
         self.percentage_label.setText(f"使用率: {percentage:.1f}%")
 
         # 更新柱状图
-        self.bar_set.remove(0, 3)
+        self.bar_set.remove(0, self.bar_set.count())
         self.bar_set.append([total, works, pages])
+
+        max_value = max(total, works, pages, 1)
+        if hasattr(self, "bar_axis_y") and self.bar_axis_y is not None:
+            self.bar_axis_y.setRange(0, max_value * 1.1)
 
         # 更新饼图
         self.pie_series.clear()
