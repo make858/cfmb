@@ -18,9 +18,12 @@ from PyQt6.QtCharts import QChart, QChartView, QBarSeries, QBarSet, QValueAxis, 
 from PyQt6.QtCore import Qt, QThread, pyqtSignal, QTimer, QMutex, QMutexLocker
 from PyQt6.QtGui import QFont, QIcon, QColor, QPainter
 
-# 配置文件路径（与主程序同一目录）
-CONFIG_PATH = Path(__file__).parent / "cf_monitor_config.json"
-DB_PATH = Path(__file__).parent / "cf_monitor.db"
+if getattr(sys, "frozen", False):
+    BASE_DIR = Path(sys.executable).resolve().parent
+else:
+    BASE_DIR = Path(__file__).resolve().parent
+CONFIG_PATH = BASE_DIR / "cf_monitor_config.json"
+DB_PATH = BASE_DIR / "cf_monitor.db"
 # 默认每日请求上限
 DEFAULT_REQUEST_LIMIT = 200000
 # 最大并发请求数
